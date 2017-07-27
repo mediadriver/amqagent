@@ -16,15 +16,19 @@
 			<cm:property name="leaderNodes" value="service:jmx:rmi://fabric1:44444/jndi/rmi://fabric1:1099/karaf-root" />
 			<cm:property name="jmxUserName" value="admin" />
 			<cm:property name="jmxPassword" value="admin" />
+			<cm:property name="advisoryEventQueueName" value="ADVISORY_EVENT" />
 			<cm:property name="queueCreateQueueName" value="CREATE_QUEUE_ADMIN_EVENT" />
 			<cm:property name="cleanupInterval" value="1m" />
 			<cm:property name="cleanupDelay" value="5s" />
 		</cm:default-properties>
 	</cm:property-placeholder>
 
-	<bean id="advisoryProcessorBean" class="com.phillips66.activemq.admin.AdvistoryEventProcessor" init-method="init">
-		<property name="leaderNodes" value="${leaderNodes}" />
+	<bean id="advisoryTransformerProcessorBean" class="com.phillips66.activemq.admin.AdvisoryTransformerProcessor">
 		<property name="queuePrefix" value="${queuePrefix}" />
+	</bean>
+	
+	<bean id="advisoryProcessorBean" class="com.phillips66.activemq.admin.AdvisoryEventProcessor" init-method="init">
+		<property name="leaderNodes" value="${leaderNodes}" />
 		<property name="jmxUserName" value="${jmxUserName}" />
 		<property name="jmxPassword" value="${jmxPassword}" />
 		<property name="producerTemplate" ref="producerTemplate" />
@@ -61,8 +65,14 @@
 
 		<template id="producerTemplate" />
 
-		<route id="advistoryToQueueCreationEventRoute">
+		<route id="advistorySubscriberRoute">
 			<from uri="amq:topic:ActiveMQ.Advisory.Queue?mapJmsMessage=false" />
+			<to uri="bean:advisoryTransformerProcessorBean" />
+			<to uri="amq:queue:{{advisoryEventQueueName}}" />
+		</route>
+		
+		<route id="advistoryToQueueCreationEventRoute">
+			<from uri="amq:queue:{{advisoryEventQueueName}}?transacted=true " />
 			<to uri="bean:advisoryProcessorBean" />
 		</route>
 
