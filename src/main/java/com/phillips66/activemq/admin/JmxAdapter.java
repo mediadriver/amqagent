@@ -166,5 +166,17 @@ public class JmxAdapter {
 			System.out.println(e);
 		}
 	}
+	
+	public List<String> getQueues() throws Exception {
+
+		ArrayList<String> queues = new ArrayList<String>();
+
+		Set<ObjectName> queueBeans = connection.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*,destinationType=Queue,destinationName=*" ), null);
+		for (ObjectName objectName: queueBeans) {
+			queues.add(objectName.getKeyPropertyList().get("destinationName"));
+		}
+		
+		return queues;
+	}
 
 }

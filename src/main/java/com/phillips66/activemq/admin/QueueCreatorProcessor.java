@@ -1,5 +1,8 @@
 package com.phillips66.activemq.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
@@ -8,13 +11,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.phillips66.activemq.model.QueueCreateEvent;
 
 public class QueueCreatorProcessor implements Processor {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdvistoryEventProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(QueueCreatorProcessor.class);
 	
 	private ProducerTemplate producerTemplate;
+	private String leaderNodes;
 	private String jmxUserName;
 	private String jmxPassword;
 	private String queueCreateQueueName; //probably a better name
@@ -28,13 +33,18 @@ public class QueueCreatorProcessor implements Processor {
 		this.producerTemplate = producerTemplate;
 	}
 
+	public String getLeaderNodes() {
+		return leaderNodes;
+	}
+	public void setLeaderNodes(String leaderNodes) {
+		this.leaderNodes = leaderNodes;
+	}
 	public String getJmxUserName() {
 		return jmxUserName;
 	}
 	public void setJmxUserName(String jmxUserName) {
 		this.jmxUserName = jmxUserName;
 	}
-
 	public String getJmxPassword() {
 		return jmxPassword;
 	}
