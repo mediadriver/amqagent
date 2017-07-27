@@ -70,9 +70,19 @@
 			<to uri="bean:advisoryTransformerProcessorBean" />
 			<to uri="amq:queue:{{advisoryEventQueueName}}" />
 		</route>
-		
-		<route id="advistoryToQueueCreationEventRoute">
-			<from uri="amq:queue:{{advisoryEventQueueName}}?transacted=true " />
+
+		<route id="advisoryToQueueCreationEventRoute">
+			<from uri="amq:queue:{{advisoryEventQueueName}}?transacted=true" />
+			<onException>
+				<exception>java.lang.Throwable</exception>
+				<redeliveryPolicy disableRedelivery="true" logStackTrace="true" />
+				<handled>
+					<constant>false</constant>
+				</handled>
+				<log loggingLevel="ERROR" logName="com.phillips66.amqagent"
+					message="[NEEDS ATTENTION!] Non-Recoverable error occurred: STOPPING ActiveMQ Agent route" />
+				<to uri="controlbus:route?routeId=advisoryToQueueCreationEventRoute&amp;action=stop" />
+			</onException>
 			<to uri="bean:advisoryProcessorBean" />
 		</route>
 
