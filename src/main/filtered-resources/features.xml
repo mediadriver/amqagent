@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="${project.groupId}.${project.artifactId}-${project.version}-fuse-63x">
+	<feature name="p66-amq-agent" version="${project.version}" start-level="60">
+		<feature>camel-core</feature>
+		<feature>camel-blueprint</feature>
+		<feature>camel-jms</feature>
+		<feature>camel-jackson</feature>
+		<feature>activemq-camel</feature>
+		<feature>jasypt-encryption</feature>
+		<bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/1.9.3.redhat_3</bundle>
+		<bundle>mvn:com.phillips66.activemq.admin/amq-agent/${project.version}</bundle>
+	</feature>
+</features>

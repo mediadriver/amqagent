@@ -14,7 +14,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<camel.version>2.15.1.redhat-620133</camel.version>
+		<camel.version>2.17.0.redhat-630187</camel.version>
 		<activemq.version>5.11.0.redhat-630187</activemq.version>
 	</properties>
 
@@ -130,6 +130,15 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+                                <directory>src/main/filtered-resources</directory>
+                                <includes>
+                                        <include>**</include>
+                                </includes>
+                                <filtering>true</filtering>
+                        </resource>
+		</resources>
 		<defaultGoal>install</defaultGoal>
 
 		<plugins>
@@ -149,7 +158,48 @@
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
-			</plugin>
+                                <executions>
+                                        <execution>
+                                                <id>copy-resources</id>
+                                                <phase>validate</phase>
+                                                <goals>
+                                                        <goal>copy-resources</goal>
+                                                </goals>
+                                                <configuration>
+                                                        <outputDirectory>target/classes</outputDirectory>
+                                                        <resources>
+                                                                <resource>
+                                                                        <directory>src/main/filtered-resources</directory>
+                                                                        <filtering>true</filtering>
+                                                                </resource>
+                                                        </resources>
+                                                </configuration>
+                                        </execution>
+                                </executions>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.0.0</version>
+                                <executions>
+                                        <execution>
+                                                <id>attach-artifacts</id>
+                                                <phase>package</phase>
+                                                <goals>
+                                                        <goal>attach-artifact</goal>
+                                                </goals>
+                                                <configuration>
+                                                        <artifacts>
+                                                                <artifact>
+                                                                        <file>target/classes/features.xml</file>
+                                                                        <type>xml</type>
+                                                                        <classifier>features</classifier>
+                                                                </artifact>
+                                                        </artifacts>
+                                                </configuration>
+                                        </execution>
+                                </executions>
+                        </plugin>
 
 			<plugin>
 				<groupId>org.jsonschema2pojo</groupId>
