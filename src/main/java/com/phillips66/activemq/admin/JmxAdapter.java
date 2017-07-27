@@ -158,9 +158,7 @@ public class JmxAdapter {
 					// brokers in the same process
 					break;
 				}
-			} else {
-				//System.out.println("queue exists already");
-			}
+			} 
 
 		} catch (Exception e) {
 			System.out.println(e);

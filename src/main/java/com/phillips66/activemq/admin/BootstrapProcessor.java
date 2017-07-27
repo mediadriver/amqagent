@@ -6,19 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.ProducerTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.phillips66.activemq.model.QueueCreateEvent;
 
 public class BootstrapProcessor implements Processor {
 
@@ -110,7 +103,7 @@ public class BootstrapProcessor implements Processor {
 						}
 					}
 				} catch (Exception ex) {
-					System.out.println("lets continue on checking other leaders: " + ex);
+					logger.warn("error processing leader in boostrap, lets continue on checking other leaders: " + ex);
 				}
 			}
 			

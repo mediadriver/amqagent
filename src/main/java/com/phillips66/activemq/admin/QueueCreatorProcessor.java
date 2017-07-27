@@ -1,8 +1,5 @@
 package com.phillips66.activemq.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
@@ -11,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.phillips66.activemq.model.QueueCreateEvent;
 
 public class QueueCreatorProcessor implements Processor {
