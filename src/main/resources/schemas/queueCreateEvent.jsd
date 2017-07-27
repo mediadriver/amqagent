@@ -1,0 +1,17 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"description": "TJSON-based message format for ActiveMQ Queue Create Event",
+	"title": "QueueCreateEvent",
+	"type": "object",
+	"additionalProperties": "false",
+
+	"properties": {
+		"queueName": {
+			"type": "string"
+		},
+		"containerJmxUrl": {
+			"type": "string"
+		}
+	}
+}
+

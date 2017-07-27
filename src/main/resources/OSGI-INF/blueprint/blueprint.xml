@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+	xsi:schemaLocation="
+       http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+       http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd
+       http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd">
+
+	<cm:property-placeholder persistent-id="nob.queue.agent">
+		<cm:default-properties>
+			<cm:property name="brokerUrl" value="tcp://localhost:61616" />
+			<cm:property name="brokerUserName" value="admin" />
+			<cm:property name="brokerPassword" value="admin" />
+			<cm:property name="queuePrefix" value="" />
+			<cm:property name="leaderNodes" value="service:jmx:rmi://fabric1:44444/jndi/rmi://fabric1:1099/karaf-root" />
+			<cm:property name="jmxUserName" value="admin" />
+			<cm:property name="jmxPassword" value="admin" />
+			<cm:property name="queueCreateQueueName" value="CREATE_QUEUE_ADMIN_EVENT" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+
+	<bean id="advisoryProcessorBean" class="com.phillips66.activemq.admin.AdvistoryEventProcessor" init-method="init">
+		<property name="leaderNodes" value="${leaderNodes}" />
+		<property name="queuePrefix" value="${queuePrefix}" />
+		<property name="jmxUserName" value="${jmxUserName}" />
+		<property name="jmxPassword" value="${jmxPassword}" />
+		<property name="producerTemplate" ref="producerTemplate" />
+		<property name="queueCreateQueueName" value="${queueCreateQueueName}" />
+	</bean>
+	
+	<bean id="queueCreatorProcessor" class="com.phillips66.activemq.admin.QueueCreatorProcessor" init-method="init">
+		<property name="jmxUserName" value="${jmxUserName}" />
+		<property name="jmxPassword" value="${jmxPassword}" />
+		<property name="producerTemplate" ref="producerTemplate" />
+		<property name="queueCreateQueueName" value="${queueCreateQueueName}" />
+	</bean>
+	
+
+	<bean id="amq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+		<property name="brokerURL" value="${brokerUrl}" />
+		<property name="userName" value="${brokerUserName}" />
+		<property name="password" value="${brokerPassword}" />
+
+	</bean>
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
+
+		<template id="producerTemplate" />
+
+		<route id="advistoryToQueueCreationEventRoute">
+			<from uri="amq:topic:ActiveMQ.Advisory.Queue?mapJmsMessage=false" />
+			<to uri="bean:advisoryProcessorBean" />
+		</route>
+
+		<route id="queueCreationEventProcessorRoute">
+			<from uri="amq:queue:{{queueCreateQueueName}}" />
+			<to uri="bean:queueCreatorProcessor" />
+		</route>
+		
+<!-- 		<route id="queueCleanupRoute"> -->
+<!-- 			<from uri="" -->
+<!-- 		</route> -->
+
+	</camelContext>
+
+</blueprint>
