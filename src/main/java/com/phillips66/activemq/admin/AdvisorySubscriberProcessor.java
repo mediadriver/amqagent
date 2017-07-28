@@ -7,9 +7,11 @@ import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AdvisoryTransformerProcessor implements Processor {
+/* processes income advisory message, astracting queuename into body message */
 
-	private static final Logger logger = LoggerFactory.getLogger(AdvisoryTransformerProcessor.class);
+public class AdvisorySubscriberProcessor implements Processor {
+
+	private static final Logger logger = LoggerFactory.getLogger(AdvisorySubscriberProcessor.class);
 	
 	private String queuePrefix;
 	
@@ -34,11 +36,13 @@ public class AdvisoryTransformerProcessor implements Processor {
 				message.getDataStructureType();
 				if (message.getDataStructure() instanceof DestinationInfo) {
 					DestinationInfo info = (DestinationInfo) message.getDataStructure();
+					// only interested in create queue events
 					if (info.getOperationType() == DestinationInfo.ADD_OPERATION_TYPE) {
 						String queueName = info.getDestination().getPhysicalName();
 
 						if (queuePrefix != null && queueName.startsWith(queuePrefix)) {					
 							exchange.getIn().setBody(queueName);
+							exchange.getIn().setHeader("PROCESS_ADVISORY", "true");
 						}
 					}
 				}

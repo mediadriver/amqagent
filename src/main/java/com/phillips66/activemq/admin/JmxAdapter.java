@@ -46,22 +46,8 @@ public class JmxAdapter {
 			HashMap<String, String[]> map = new HashMap<String, String[]>();
 			String[] credentials = new String[2];
 			credentials[0] = configProps.getProperty("jmxUsername");
-
-			// check if we need to decrypt the password
 			String jmxPassword = configProps.getProperty("jmxPassword");
-			if (jmxPassword.startsWith("ENC(") && jmxPassword.endsWith(")")) {
-				StandardPBEStringEncryptor jascrpt = new StandardPBEStringEncryptor();
-				EnvironmentStringPBEConfig config = new EnvironmentStringPBEConfig();
-				config.setPasswordEnvName("MONITOR_ENCRYPTION_PASSWORD");
-				config.setAlgorithm("PBEWithMD5AndDES");
-				jascrpt.setConfig(config);
-				jascrpt.initialize();
-				jmxPassword = jmxPassword
-						.substring(4, jmxPassword.length() - 1);
-				jmxPassword = jascrpt.decrypt(jmxPassword);
-			}
 			credentials[1] = jmxPassword;
-
 			map.put(JMXConnector.CREDENTIALS, credentials);
 
 			String jmxUrl = configProps.getProperty("jmxUrl");

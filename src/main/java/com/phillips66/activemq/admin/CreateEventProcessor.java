@@ -15,10 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.phillips66.activemq.model.QueueCreateEvent;
 
-public class AdvisoryEventProcessor implements Processor {
+public class CreateEventProcessor implements Processor {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(AdvisoryEventProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(CreateEventProcessor.class);
 
 	private ProducerTemplate producerTemplate;
 
@@ -27,7 +26,7 @@ public class AdvisoryEventProcessor implements Processor {
 	private String leaderNodes;
 	private String jmxUserName;
 	private String jmxPassword;
-	private String queueCreateQueueName; // probably a better name
+	private String createEventQueue;
 
 	public ProducerTemplate getProducerTemplate() {
 		return producerTemplate;
@@ -62,11 +61,11 @@ public class AdvisoryEventProcessor implements Processor {
 	}
 
 	public String getQueueCreateQueueName() {
-		return queueCreateQueueName;
+		return createEventQueue;
 	}
 
 	public void setQueueCreateQueueName(String queueCreateQueueName) {
-		this.queueCreateQueueName = queueCreateQueueName;
+		this.createEventQueue = queueCreateQueueName;
 	}
 
 	public void init() {
@@ -80,7 +79,7 @@ public class AdvisoryEventProcessor implements Processor {
 		if (exchange != null && exchange.getIn() != null && exchange.getIn().getBody() != null) {
 
 			String queueName = exchange.getIn().getBody(String.class);
-			
+			System.out.println("queueName:" + queueName);
 			List<String> jmxContainerUrls = new ArrayList<String>();
 
 			// lets get the container urls from a leader
@@ -100,7 +99,7 @@ public class AdvisoryEventProcessor implements Processor {
 
 			if (jmxContainerUrls.size() > 0) {
 				// now lets contact each container and see if it's a amq instance,
-				// if so create an event for it
+				// if so create an queue create event for it
 				for (String jmxUrl : jmxContainerUrls) {
 					JmxAdapter container = jmxConnections.getConnection(jmxUrl);
 					if (container.isMasterBroker()) {
@@ -113,7 +112,7 @@ public class AdvisoryEventProcessor implements Processor {
 						// TODO - reuse the mapper/writer?
 						ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 						String json = ow.writeValueAsString(queueCreateEvent);
-						producerTemplate.sendBody("amq:queue:" + queueCreateQueueName, json);
+						producerTemplate.sendBody("amqtx:queue:" + createEventQueue, json);
 	
 					}
 				}
