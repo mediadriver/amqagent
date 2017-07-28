@@ -118,7 +118,7 @@
 		<property name="configuration" ref="amqConfig" />
 	</bean>
 
-	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint" id="AMQAgentContext">
 
 		<template id="producerTemplate" />
 
@@ -143,7 +143,7 @@
 				</handled>
 				<log loggingLevel="ERROR" logName="com.phillips66.amqagent"
 					message="[NEEDS ATTENTION!] Non-Recoverable error occurred: STOPPING ActiveMQ Agent route" />
-				<to uri="controlbus:route?routeId=AdvisoryToQueueCreationEventRoute&amp;action=stop" />
+				<to uri="controlbus:route?routeId=AdvisoryToQueueCreationEventRoute&amp;action=stop&amp;async=true" />
 			</onException>
 			<to uri="bean:createEventProcessorBean" />
 		</route>

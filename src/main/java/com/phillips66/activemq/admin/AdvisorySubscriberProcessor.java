@@ -40,7 +40,8 @@ public class AdvisorySubscriberProcessor implements Processor {
 					if (info.getOperationType() == DestinationInfo.ADD_OPERATION_TYPE) {
 						String queueName = info.getDestination().getPhysicalName();
 
-						if (queuePrefix != null && queueName.startsWith(queuePrefix)) {					
+						if (queuePrefix != null && queueName.startsWith(queuePrefix)) {
+							// probably a little brittle encoding value directly
 							exchange.getIn().setBody(queueName);
 							exchange.getIn().setHeader("PROCESS_ADVISORY", "true");
 						}

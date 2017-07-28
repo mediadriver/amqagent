@@ -22,6 +22,7 @@ public class CreateEventProcessor implements Processor {
 	private ProducerTemplate producerTemplate;
 
 	private JmxConnections jmxConnections = new JmxConnections();
+	private ObjectMapper objectMapper = new  ObjectMapper();  
 
 	private String leaderNodes;
 	private String jmxUserName;
@@ -79,7 +80,7 @@ public class CreateEventProcessor implements Processor {
 		if (exchange != null && exchange.getIn() != null && exchange.getIn().getBody() != null) {
 
 			String queueName = exchange.getIn().getBody(String.class);
-			System.out.println("queueName:" + queueName);
+
 			List<String> jmxContainerUrls = new ArrayList<String>();
 
 			// lets get the container urls from a leader
@@ -110,7 +111,7 @@ public class CreateEventProcessor implements Processor {
 						queueCreateEvent.setContainerJmxUrl(jmxUrl);
 	
 						// TODO - reuse the mapper/writer?
-						ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+						ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
 						String json = ow.writeValueAsString(queueCreateEvent);
 						producerTemplate.sendBody("amqtx:queue:" + createEventQueue, json);
 	

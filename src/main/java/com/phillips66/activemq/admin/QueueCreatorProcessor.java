@@ -18,8 +18,9 @@ public class QueueCreatorProcessor implements Processor {
 	private String leaderNodes;
 	private String jmxUserName;
 	private String jmxPassword;
-	private String queueCreateQueueName; //probably a better name
+	private String queueCreateQueueName;
 
+	private ObjectMapper objectMapper = new  ObjectMapper();
 	private JmxConnections jmxConnections = new JmxConnections();
 	
 	public ProducerTemplate getProducerTemplate() {
@@ -65,7 +66,7 @@ public class QueueCreatorProcessor implements Processor {
 		
 		String body = exchange.getIn().getBody(String.class);
 		if (body != null) {
-			ObjectReader or = new ObjectMapper().reader(QueueCreateEvent.class);
+			ObjectReader or = objectMapper.reader(QueueCreateEvent.class);
 			QueueCreateEvent queueCreateEvent = or.readValue(body);
 			
 			JmxAdapter jmxAdapter = jmxConnections.getConnection(queueCreateEvent.getContainerJmxUrl());

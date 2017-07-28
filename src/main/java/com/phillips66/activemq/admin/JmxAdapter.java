@@ -21,8 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class JmxAdapter {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(JmxAdapter.class);
+	private static final Logger logger = LoggerFactory.getLogger(JmxAdapter.class);
 
 	private Properties configProps;
 	private JMXConnector jmxConnector;
@@ -91,10 +90,6 @@ public class JmxAdapter {
 														// nodes
 					jmxUrls.add((String) treeMap.get("jmxUrl"));
 				}
-				// for(Object key: treeMap.keySet()) {
-				// System.out.println(key);
-				// }
-
 			}
 		}
 		
@@ -119,7 +114,7 @@ public class JmxAdapter {
 			}
 
 		} catch (Exception e) {
-			System.out.println(e);
+			logger.error("checking if master broker" + e);
 		}
 		return broker;
 	}
@@ -147,7 +142,7 @@ public class JmxAdapter {
 			} 
 
 		} catch (Exception e) {
-			System.out.println(e);
+			logger.error("create queue" + e);
 		}
 	}
 	
