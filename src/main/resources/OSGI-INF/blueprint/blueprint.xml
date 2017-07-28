@@ -159,7 +159,7 @@
 		</route>
 
 		<route id="BoostrapQueueSyncRoute" autoStartup="{{enableBoostrapQueueSyncRoute}}">
-			<from uri="timer:bootstrapTimer?repeatCount=1"/>
+			<from uri="timer:bootstrapTimer?repeatCount=1&amp;delay=2m"/>
 			<to uri="bean:bootstrapProcessor" />
 		</route>
 
