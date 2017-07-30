@@ -73,4 +73,8 @@ public class QueueCreatorProcessor implements Processor {
 			jmxAdapter.createQueue(queueCreateEvent.getQueueName());
 		}
 	}
+	
+	public void shutdown() {
+		jmxConnections.shutdown();
+	}
 }

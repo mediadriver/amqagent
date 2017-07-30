@@ -41,4 +41,11 @@ public class JmxConnections {
 		}
 		return jmxAdapter;
 	}
+	
+	public void shutdown() {
+		for (Map.Entry<String, JmxAdapter> entry : connections.entrySet()) {
+		    JmxAdapter jmxAdapter = entry.getValue();
+		    jmxAdapter.shutdown();
+		}
+	}
 }

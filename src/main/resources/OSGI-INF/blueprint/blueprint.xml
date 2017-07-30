@@ -53,7 +53,7 @@
 		<property name="queuePrefix" value="${queuePrefix}" />
 	</bean>
 	
-	<bean id="createEventProcessorBean" class="com.phillips66.activemq.admin.CreateEventProcessor" init-method="init">
+	<bean id="createEventProcessorBean" class="com.phillips66.activemq.admin.CreateEventProcessor" init-method="init" destroy-method="shutdown">
 		<property name="leaderNodes" value="${leaderNodes}" />
 		<property name="jmxUserName" value="${jmxUserName}" />
 		<property name="jmxPassword" value="${jmxPassword}" />
@@ -61,7 +61,7 @@
 		<property name="queueCreateQueueName" value="${queueCreateQueueName}" />
 	</bean>
 	
-	<bean id="queueCreatorProcessor" class="com.phillips66.activemq.admin.QueueCreatorProcessor" init-method="init">
+	<bean id="queueCreatorProcessor" class="com.phillips66.activemq.admin.QueueCreatorProcessor" init-method="init" destroy-method="shutdown">
 		<property name="leaderNodes" value="${leaderNodes}" />
 		<property name="jmxUserName" value="${jmxUserName}" />
 		<property name="jmxPassword" value="${jmxPassword}" />
@@ -73,7 +73,7 @@
 		<property name="queueCleanupPrefix" value="${queueCleanupPrefix}" />
 	</bean>
 	
-	<bean id="bootstrapProcessor" class="com.phillips66.activemq.admin.BootstrapProcessor" init-method="init">
+	<bean id="bootstrapProcessor" class="com.phillips66.activemq.admin.BootstrapProcessor" init-method="init" destroy-method="shutdown">
 		<property name="queuePrefix" value="${queuePrefix}" />
 		<property name="leaderNodes" value="${leaderNodes}" />
 		<property name="jmxUserName" value="${jmxUserName}" />
@@ -127,7 +127,7 @@
 			<to uri="bean:advisorySubscriberProcessorBean" />
 			<choice>
 	            <when>
-	                <simple>${header.PROCESS_ADVISORY} == 'true'</simple>
+	                <simple>${header.AMQ_AGENT_PROCESS_ADVISORY} == 'true'</simple>
 	                <to uri="amq:queue:{{advisoryEventQueueName}}" />
 	            </when>
 	        </choice>

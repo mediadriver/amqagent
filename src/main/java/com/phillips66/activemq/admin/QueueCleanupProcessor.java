@@ -50,8 +50,7 @@ public class QueueCleanupProcessor implements Processor {
 						Set<ObjectName> brokers = mbeanServer.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);
 
 						for (ObjectName brokerObjectNames : brokers) {
-							Object result = mbeanServer.invoke(brokerObjectNames, "removeQueue", new Object[] {queueName}, new String[] {String.class.getName()});
-							//TOOD - process result
+							mbeanServer.invoke(brokerObjectNames, "removeQueue", new Object[] {queueName}, new String[] {String.class.getName()});
 							break;
 						}
 					}

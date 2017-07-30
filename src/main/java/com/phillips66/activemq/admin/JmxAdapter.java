@@ -24,17 +24,12 @@ public class JmxAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(JmxAdapter.class);
 
 	private Properties configProps;
+	String jmxUrl;
 	private JMXConnector jmxConnector;
 	private MBeanServerConnection connection;
 
 	public JmxAdapter(Properties configProps) {
-
-		try {
 			this.configProps = configProps;
-
-		} catch (Exception ex) {
-			logger.error("In JmxAdapter()" + ex);
-		}
 	}
 
 	public boolean connect() {
@@ -49,13 +44,12 @@ public class JmxAdapter {
 			credentials[1] = jmxPassword;
 			map.put(JMXConnector.CREDENTIALS, credentials);
 
-			String jmxUrl = configProps.getProperty("jmxUrl");
+			jmxUrl = configProps.getProperty("jmxUrl");
 			if (jmxUrl == null) {
 				jmxUrl = "service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root";
 			}
 
-			jmxConnector = JMXConnectorFactory.connect(
-					new JMXServiceURL(jmxUrl), map);
+			jmxConnector = JMXConnectorFactory.connect(new JMXServiceURL(jmxUrl), map);
 
 			// Get an MBeanServerConnection on the remote VM.
 			connection = jmxConnector.getMBeanServerConnection();
@@ -86,8 +80,7 @@ public class JmxAdapter {
 		if (result != null) {
 			ArrayList<TreeMap> containers = (ArrayList) result;
 			for (TreeMap treeMap : containers) {
-				if (treeMap.get("parent") != null) { // lets not add root
-														// nodes
+				if (treeMap.get("parent") != null) { // lets not add root nodes
 					jmxUrls.add((String) treeMap.get("jmxUrl"));
 				}
 			}
@@ -100,16 +93,11 @@ public class JmxAdapter {
 		boolean broker = false;
 
 		try {
-			Set<ObjectName> beans = connection.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);
+			Set<ObjectName> brokerBeans = connection.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);
 
-			for (ObjectName objectName : beans) {
-
-				ObjectInstance jmxInstance = connection.getObjectInstance(objectName);
-
-				broker = !(boolean) connection.getAttribute(objectName, "Slave");
-
-				// let's just use the first one, doesn't make sense to have two
-				// brokers in the same process
+			for (ObjectName brokerName : brokerBeans) {
+				broker = !(boolean) connection.getAttribute(brokerName, "Slave");
+				// let's just use the first one, doesn't make sense to have two brokers in the same process
 				break;
 			}
 
@@ -121,25 +109,17 @@ public class JmxAdapter {
 	
 	public void createQueue(String queueName) {
 		try {
-			
-			// does the queue exist already
+			// does the queue exist already?
 			Set<ObjectName> queueBeans = connection.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*,destinationType=Queue,destinationName=" + queueName), null);
 			if (queueBeans.size() == 0) {
-				
-				Set<ObjectName> beans = connection.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);
-	
-				for (ObjectName objectName : beans) {
-	
-					ObjectInstance jmxInstance = connection.getObjectInstance(objectName);
-	
-					Object result = connection.invoke(objectName, "addQueue", new Object[] {queueName}, new String[] {String.class.getName()});
-					// TODO process result (null currently on success) and handle errors
-	
-					// let's just use the first one, doesn't make sense to have two
-					// brokers in the same process
+				Set<ObjectName> brokerBeans = connection.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);
+				for (ObjectName brokerName : brokerBeans) {
+					logger.info("add queue call queueName:" + queueName + " jmxUrl:" + jmxUrl);
+					connection.invoke(brokerName, "addQueue", new Object[] {queueName}, new String[] {String.class.getName()});
+					// let's just use the first one, doesn't make sense to have two brokers in the same process
 					break;
 				}
-			} 
+			}
 
 		} catch (Exception e) {
 			logger.error("create queue" + e);
@@ -154,7 +134,6 @@ public class JmxAdapter {
 		for (ObjectName objectName: queueBeans) {
 			queues.add(objectName.getKeyPropertyList().get("destinationName"));
 		}
-		
 		return queues;
 	}
 

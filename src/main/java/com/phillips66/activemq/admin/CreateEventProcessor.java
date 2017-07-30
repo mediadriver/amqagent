@@ -1,10 +1,10 @@
 package com.phillips66.activemq.admin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import org.apache.activemq.command.ActiveMQMessage;
-import org.apache.activemq.command.DestinationInfo;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
@@ -77,25 +77,32 @@ public class CreateEventProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 
-		if (exchange != null && exchange.getIn() != null && exchange.getIn().getBody() != null) {
+		if (exchange != null && exchange.getIn() != null && exchange.getIn().getHeader("AMQ_AGENT_QUEUE_NAME") != null) {
 
-			String queueName = exchange.getIn().getBody(String.class);
+			String queueName = exchange.getIn().getHeader("AMQ_AGENT_QUEUE_NAME",String.class);
 
 			List<String> jmxContainerUrls = new ArrayList<String>();
-
-			// lets get the container urls from a leader
+			int searchCount = 0;
+			
+			// get the container urls from a leader
 			String leaders[] = leaderNodes.split(",");
-			for (String leader : leaders) { // lets try each leader until one returns
-				try {
-					JmxAdapter jmxAdapter = jmxConnections.getConnection(leader);
-					List<String> jmxUrls = jmxAdapter.getContainers();
-					if (jmxUrls.size() > 0) {
-						jmxContainerUrls = jmxUrls;
-						break; // we have a list now
+			Collections.shuffle(Arrays.asList(leaders));
+			
+			searchloop:
+			while (searchCount < 3) {
+				for (String leader : leaders) { // lets try each leader until one returns
+					try {
+						JmxAdapter jmxAdapter = jmxConnections.getConnection(leader);
+						List<String> jmxUrls = jmxAdapter.getContainers();
+						if (jmxUrls.size() > 0) {
+							jmxContainerUrls = jmxUrls;
+							break searchloop; // we have a list now
+						}
+					} catch (Exception ex) {
+						logger.warn("couldn't get containers from leader, lets continue on checking other leaders: "+ ex);
 					}
-				} catch (Exception ex) {
-					logger.warn("couldn't get containers from leader, lets continue on checking other leaders: "+ ex);
 				}
+				searchCount++;
 			}
 
 			if (jmxContainerUrls.size() > 0) {
@@ -110,7 +117,6 @@ public class CreateEventProcessor implements Processor {
 						queueCreateEvent.setQueueName(queueName);
 						queueCreateEvent.setContainerJmxUrl(jmxUrl);
 	
-						// TODO - reuse the mapper/writer?
 						ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
 						String json = ow.writeValueAsString(queueCreateEvent);
 						producerTemplate.sendBody("amqtx:queue:" + createEventQueue, json);
@@ -123,5 +129,9 @@ public class CreateEventProcessor implements Processor {
 
 		}
 
+	}
+	
+	public void shutdown() {
+		jmxConnections.shutdown();
 	}
 }
