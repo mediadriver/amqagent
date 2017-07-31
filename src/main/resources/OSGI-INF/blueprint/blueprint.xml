@@ -10,7 +10,7 @@
 
 	<cm:property-placeholder persistent-id="amq.agent" update-strategy="reload">
 		<cm:default-properties>
-			<cm:property name="brokerUrl" value="tcp://localhost:61616" />
+			<cm:property name="brokerUrl" value="vm:broker:(tcp://localhost)" />
 			<cm:property name="brokerUserName" value="admin" />
 			<cm:property name="brokerPassword" value="admin" />
 			<cm:property name="queuePrefix" value="vSub" />
