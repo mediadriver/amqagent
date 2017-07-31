@@ -73,6 +73,10 @@
 		<property name="queueCleanupPrefix" value="${queueCleanupPrefix}" />
 	</bean>
 	
+	<bean id="advisoryConsumerProcessor" class="com.phillips66.activemq.admin.AdvisoryConsumerProcessor">
+		<property name="queuePrefix" value="${queueCleanupPrefix}" />
+	</bean>
+	
 	<bean id="bootstrapProcessor" class="com.phillips66.activemq.admin.BootstrapProcessor" init-method="init" destroy-method="shutdown">
 		<property name="queuePrefix" value="${queuePrefix}" />
 		<property name="leaderNodes" value="${leaderNodes}" />
@@ -131,7 +135,7 @@
 	                <to uri="amq:queue:{{advisoryEventQueueName}}" />
 	            </when>
 	        </choice>
-			</route>
+		</route>
 	
 		<route id="AdvisoryToQueueCreationEventRoute" autoStartup="{{enableAdvisoryToQueueCreationEventRoute}}">
 			<from uri="amqtx:queue:{{advisoryEventQueueName}}" />
@@ -153,8 +157,24 @@
 			<to uri="bean:queueCreatorProcessor" />
 		</route>
 		
-		<route id="QueueCleanupRoute" autoStartup="{{enableQueueCleanupRoute}}">
+		<route id="QueueCleanupTimerRoute" autoStartup="{{enableQueueCleanupRoute}}">
 			<from uri="timer:queueCleanupTimer?period={{cleanupInterval}}&amp;delay={{cleanupDelay}}"/>
+			<to uri="direct:queueCleanUp" />
+		</route>
+		
+		<route id="QueueCleanupAdvisoryRoute" autoStartup="{{enableQueueCleanupRoute}}">
+			<from uri="amq:topic:ActiveMQ.Advisory.Consumer.Queue.vSub.&gt;?mapJmsMessage=false" />
+			<to uri="bean:advisoryConsumerProcessor" />
+			<choice>
+	            <when>
+	                <simple>${header.AMQ_AGENT_PROCESS_ADVISORY} == 'true'</simple>
+	                <to uri="direct:queueCleanUp" />
+	            </when>
+	        </choice>
+	    </route>
+		
+		<route id="QueueCleanUp" autoStartup="{{enableQueueCleanupRoute}}">
+			<from uri="direct:queueCleanUp"/>
 			<to uri="bean:queueCleanupProcessor" />
 		</route>
 

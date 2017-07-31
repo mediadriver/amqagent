@@ -16,7 +16,7 @@ public class QueueCleanupProcessor implements Processor {
 
 	private static final Logger logger = LoggerFactory.getLogger(QueueCleanupProcessor.class);
 
-	private String queueCleanupPrefix;
+	private String queueCleanupPrefix = "vSub.nondurable";
 
 	private MBeanServer mbeanServer;
 	
@@ -50,6 +50,7 @@ public class QueueCleanupProcessor implements Processor {
 						Set<ObjectName> brokers = mbeanServer.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);
 
 						for (ObjectName brokerObjectNames : brokers) {
+							logger.info(String.format("Removing queue %s due to no active consumers", queueName));
 							mbeanServer.invoke(brokerObjectNames, "removeQueue", new Object[] {queueName}, new String[] {String.class.getName()});
 							break;
 						}
