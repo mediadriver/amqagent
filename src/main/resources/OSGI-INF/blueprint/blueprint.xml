@@ -127,7 +127,7 @@
 		<template id="producerTemplate" />
 
 		<route id="AdvisorySubscriberBridgeRoute" autoStartup="{{enableAdvisorySubscriberBridgeRoute}}">
-			<from uri="amq:topic:ActiveMQ.Advisory.Queue?mapJmsMessage=false" />
+			<from uri="amq:topic:ActiveMQ.Advisory.Queue?mapJmsMessage=false&amp;jmsMessageType=Object" />
 			<to uri="bean:advisorySubscriberProcessorBean" />
 			<choice>
 	            <when>
@@ -138,7 +138,7 @@
 		</route>
 	
 		<route id="AdvisoryToQueueCreationEventRoute" autoStartup="{{enableAdvisoryToQueueCreationEventRoute}}">
-			<from uri="amqtx:queue:{{advisoryEventQueueName}}" />
+			<from uri="amqtx:queue:{{advisoryEventQueueName}}?mapJmsMessage=false&amp;jmsMessageType=Object" />
 			<onException>
 				<exception>java.lang.Throwable</exception>
 				<redeliveryPolicy disableRedelivery="true" logStackTrace="true" />
@@ -163,7 +163,7 @@
 		</route>
 		
 		<route id="QueueCleanupAdvisoryRoute" autoStartup="{{enableQueueCleanupRoute}}">
-			<from uri="amq:topic:ActiveMQ.Advisory.Consumer.Queue.vSub.&gt;?mapJmsMessage=false" />
+			<from uri="amq:topic:ActiveMQ.Advisory.Consumer.Queue.vSub.&gt;?mapJmsMessage=false&amp;jmsMessageType=Object" />
 			<to uri="bean:advisoryConsumerProcessor" />
 			<choice>
 	            <when>

@@ -112,7 +112,7 @@ public class BootstrapProcessor implements Processor {
 							}
 						}
 					} catch (Exception ex) {
-						logger.warn("error processing leader in boostrap, lets continue on checking other leaders: " + ex);
+						logger.warn("error processing leader in boostrap, lets continue on checking other leaders: " + ex, ex);
 					}
 				}
 				searchCount++;
@@ -120,7 +120,7 @@ public class BootstrapProcessor implements Processor {
 			
 			
 		} catch (Exception ex) {
-			logger.error("synching queues");
+			logger.error("Error synchronizing queue names while bootstrapping", ex);
 		}
 	}
 }

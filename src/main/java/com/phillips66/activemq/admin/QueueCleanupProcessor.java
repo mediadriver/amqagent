@@ -59,7 +59,7 @@ public class QueueCleanupProcessor implements Processor {
 				
 			}
 		} catch (Exception ex) {
-			logger.error("cleanup queues: " + ex);
+			logger.error("cleanup queues: " + ex, ex);
 		}
 	}
 }

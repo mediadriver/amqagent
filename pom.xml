@@ -7,7 +7,7 @@
 	<groupId>com.phillips66.activemq.admin</groupId>
 	<artifactId>amq-agent</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 
 	<name>AMQ Queue Management Agents</name>
 
@@ -251,9 +251,9 @@
 				</executions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>camel-blueprint</Bundle-SymbolicName>
+						<Bundle-SymbolicName>p66-amq-agent</Bundle-SymbolicName>
 						<Private-Package>com.phillips66.activemq.*</Private-Package>
-						<Import-Package>*,io.fabric8.api,org.jasypt.encryption.pbe</Import-Package>
+						<Import-Package>*,io.fabric8.api,io.fabric8.service.ssh,org.jasypt.encryption.pbe</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

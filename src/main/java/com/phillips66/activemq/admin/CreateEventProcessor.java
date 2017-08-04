@@ -99,7 +99,7 @@ public class CreateEventProcessor implements Processor {
 							break searchloop; // we have a list now
 						}
 					} catch (Exception ex) {
-						logger.warn("couldn't get containers from leader, lets continue on checking other leaders: "+ ex);
+						logger.warn("couldn't get containers from leader, lets continue on checking other leaders: "+ ex.getMessage(), ex);
 					}
 				}
 				searchCount++;

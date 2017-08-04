@@ -6,16 +6,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +97,7 @@ public class JmxAdapter {
 			}
 
 		} catch (Exception e) {
-			logger.error("checking if master broker" + e);
+			logger.error("checking if master broker" + e, e);
 		}
 		return broker;
 	}
@@ -122,7 +117,7 @@ public class JmxAdapter {
 			}
 
 		} catch (Exception e) {
-			logger.error("create queue" + e);
+			logger.error("create queue" + e, e);
 		}
 	}
 	
