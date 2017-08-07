@@ -16,8 +16,9 @@
 			<cm:property name="queuePrefix" value="vSub" />
 			<cm:property name="queueCleanupPrefix" value="vSub.nondurable"/>
 			<cm:property name="leaderNodes" value="service:jmx:rmi://fabric1:44444/jndi/rmi://fabric1:1099/karaf-root" />
-			<cm:property name="jmxUserName" value="admin" />
-			<cm:property name="jmxPassword" value="admin" />
+			<cm:property name="username" value="admin" />
+			<cm:property name="password" value="admin" />
+			<cm:property name="adapter" value="http" />
 			<cm:property name="advisoryEventQueueName" value="AMQ_AGENT_ADVISORY" />
 			<cm:property name="queueCreateQueueName" value="AMQ_AGENT_CREATE_EVENT" />
 			<cm:property name="cleanupInterval" value="1m" />
@@ -55,16 +56,16 @@
 	
 	<bean id="createEventProcessorBean" class="com.phillips66.activemq.admin.CreateEventProcessor" init-method="init" destroy-method="shutdown">
 		<property name="leaderNodes" value="${leaderNodes}" />
-		<property name="jmxUserName" value="${jmxUserName}" />
-		<property name="jmxPassword" value="${jmxPassword}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
 		<property name="producerTemplate" ref="producerTemplate" />
 		<property name="queueCreateQueueName" value="${queueCreateQueueName}" />
 	</bean>
 	
 	<bean id="queueCreatorProcessor" class="com.phillips66.activemq.admin.QueueCreatorProcessor" init-method="init" destroy-method="shutdown">
 		<property name="leaderNodes" value="${leaderNodes}" />
-		<property name="jmxUserName" value="${jmxUserName}" />
-		<property name="jmxPassword" value="${jmxPassword}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
 		<property name="producerTemplate" ref="producerTemplate" />
 		<property name="queueCreateQueueName" value="${queueCreateQueueName}" />
 	</bean>
@@ -80,8 +81,8 @@
 	<bean id="bootstrapProcessor" class="com.phillips66.activemq.admin.BootstrapProcessor" init-method="init" destroy-method="shutdown">
 		<property name="queuePrefix" value="${queuePrefix}" />
 		<property name="leaderNodes" value="${leaderNodes}" />
-		<property name="jmxUserName" value="${jmxUserName}" />
-		<property name="jmxPassword" value="${jmxPassword}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
 	</bean>
 
 	<bean id="amq" class="org.apache.activemq.camel.component.ActiveMQComponent">
@@ -127,7 +128,7 @@
 		<template id="producerTemplate" />
 
 		<route id="AdvisorySubscriberBridgeRoute" autoStartup="{{enableAdvisorySubscriberBridgeRoute}}">
-			<from uri="amq:topic:ActiveMQ.Advisory.Queue?mapJmsMessage=false&amp;jmsMessageType=Object" />
+			<from uri="amq:topic:ActiveMQ.Advisory.Queue?mapJmsMessage=false" />
 			<to uri="bean:advisorySubscriberProcessorBean" />
 			<choice>
 	            <when>
@@ -138,7 +139,7 @@
 		</route>
 	
 		<route id="AdvisoryToQueueCreationEventRoute" autoStartup="{{enableAdvisoryToQueueCreationEventRoute}}">
-			<from uri="amqtx:queue:{{advisoryEventQueueName}}?mapJmsMessage=false&amp;jmsMessageType=Object" />
+			<from uri="amqtx:queue:{{advisoryEventQueueName}}?mapJmsMessage=false" />
 			<onException>
 				<exception>java.lang.Throwable</exception>
 				<redeliveryPolicy disableRedelivery="true" logStackTrace="true" />
@@ -163,7 +164,7 @@
 		</route>
 		
 		<route id="QueueCleanupAdvisoryRoute" autoStartup="{{enableQueueCleanupRoute}}">
-			<from uri="amq:topic:ActiveMQ.Advisory.Consumer.Queue.vSub.&gt;?mapJmsMessage=false&amp;jmsMessageType=Object" />
+			<from uri="amq:topic:ActiveMQ.Advisory.Consumer.Queue.vSub.&gt;?mapJmsMessage=false" />
 			<to uri="bean:advisoryConsumerProcessor" />
 			<choice>
 	            <when>

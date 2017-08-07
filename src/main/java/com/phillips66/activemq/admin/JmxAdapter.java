@@ -14,32 +14,26 @@ import javax.management.remote.JMXServiceURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JmxAdapter {
+public class JmxAdapter implements FabricAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(JmxAdapter.class);
-
-	private Properties configProps;
 	String jmxUrl;
 	private JMXConnector jmxConnector;
 	private MBeanServerConnection connection;
 
-	public JmxAdapter(Properties configProps) {
-			this.configProps = configProps;
-	}
-
-	public boolean connect() {
+	public boolean connect(Properties configProps) {
 		boolean connected = false;
 
 		try {
 
 			HashMap<String, String[]> map = new HashMap<String, String[]>();
 			String[] credentials = new String[2];
-			credentials[0] = configProps.getProperty("jmxUsername");
-			String jmxPassword = configProps.getProperty("jmxPassword");
+			credentials[0] = configProps.getProperty("username");
+			String jmxPassword = configProps.getProperty("password");
 			credentials[1] = jmxPassword;
 			map.put(JMXConnector.CREDENTIALS, credentials);
 
-			jmxUrl = configProps.getProperty("jmxUrl");
+			jmxUrl = configProps.getProperty("url");
 			if (jmxUrl == null) {
 				jmxUrl = "service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root";
 			}
@@ -51,7 +45,7 @@ public class JmxAdapter {
 			connected = true;
 
 		} catch (Exception ex) {
-			logger.error("In connect()" + ex);
+			logger.error("Error during connect" + ex.getMessage(), ex);
 			ex.printStackTrace();
 		}
 		return connected;

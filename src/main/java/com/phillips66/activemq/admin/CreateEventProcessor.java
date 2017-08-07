@@ -21,12 +21,12 @@ public class CreateEventProcessor implements Processor {
 
 	private ProducerTemplate producerTemplate;
 
-	private JmxConnections jmxConnections = new JmxConnections();
+	private FabricConnections fabricConnections = new FabricConnections();
 	private ObjectMapper objectMapper = new  ObjectMapper();  
 
 	private String leaderNodes;
-	private String jmxUserName;
-	private String jmxPassword;
+	private String username;
+	private String password;
 	private String createEventQueue;
 
 	public ProducerTemplate getProducerTemplate() {
@@ -45,20 +45,20 @@ public class CreateEventProcessor implements Processor {
 		this.leaderNodes = leaderNodes;
 	}
 
-	public String getJmxUserName() {
-		return jmxUserName;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setJmxUserName(String jmxUserName) {
-		this.jmxUserName = jmxUserName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public String getJmxPassword() {
-		return jmxPassword;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setJmxPassword(String jmxPassword) {
-		this.jmxPassword = jmxPassword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getQueueCreateQueueName() {
@@ -70,8 +70,8 @@ public class CreateEventProcessor implements Processor {
 	}
 
 	public void init() {
-		jmxConnections.setJmxUsername(jmxUserName);
-		jmxConnections.setJmxPassword(jmxPassword);
+		fabricConnections.setUsername(username);
+		fabricConnections.setPassword(password);
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class CreateEventProcessor implements Processor {
 
 			String queueName = exchange.getIn().getHeader("AMQ_AGENT_QUEUE_NAME",String.class);
 
-			List<String> jmxContainerUrls = new ArrayList<String>();
+			List<String> containerUrls = new ArrayList<String>();
 			int searchCount = 0;
 			
 			// get the container urls from a leader
@@ -92,10 +92,10 @@ public class CreateEventProcessor implements Processor {
 			while (searchCount < 3) {
 				for (String leader : leaders) { // lets try each leader until one returns
 					try {
-						JmxAdapter jmxAdapter = jmxConnections.getConnection(leader);
-						List<String> jmxUrls = jmxAdapter.getContainers();
-						if (jmxUrls.size() > 0) {
-							jmxContainerUrls = jmxUrls;
+						FabricAdapter fabricAdapter = fabricConnections.getConnection(leader);
+						List<String> urls = fabricAdapter.getContainers();
+						if (urls.size() > 0) {
+							containerUrls = urls;
 							break searchloop; // we have a list now
 						}
 					} catch (Exception ex) {
@@ -105,11 +105,11 @@ public class CreateEventProcessor implements Processor {
 				searchCount++;
 			}
 
-			if (jmxContainerUrls.size() > 0) {
+			if (containerUrls.size() > 0) {
 				// now lets contact each container and see if it's a amq instance,
 				// if so create an queue create event for it
-				for (String jmxUrl : jmxContainerUrls) {
-					JmxAdapter container = jmxConnections.getConnection(jmxUrl);
+				for (String jmxUrl : containerUrls) {
+					FabricAdapter container = fabricConnections.getConnection(jmxUrl);
 					if (container.isMasterBroker()) {
 						// create a message to create this queue
 	
@@ -132,6 +132,6 @@ public class CreateEventProcessor implements Processor {
 	}
 	
 	public void shutdown() {
-		jmxConnections.shutdown();
+		fabricConnections.shutdown();
 	}
 }

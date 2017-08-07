@@ -21,11 +21,11 @@ public class BootstrapProcessor implements Processor {
 	
 	private String queuePrefix;
 	private String leaderNodes;
-	private String jmxUserName;
-	private String jmxPassword;
+	private String username;
+	private String password;
 
 	private MBeanServer mbeanServer;
-	private JmxConnections jmxConnections = new JmxConnections();
+	private FabricConnections fabricConnections = new FabricConnections();
 	
 	public String getQueuePrefix() {
 		return queuePrefix;
@@ -39,28 +39,27 @@ public class BootstrapProcessor implements Processor {
 	public void setLeaderNodes(String leaderNodes) {
 		this.leaderNodes = leaderNodes;
 	}
-	public String getJmxUserName() {
-		return jmxUserName;
+	public String getUsername() {
+		return username;
 	}
-	public void setJmxUserName(String jmxUserName) {
-		this.jmxUserName = jmxUserName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
-	public String getJmxPassword() {
-		return jmxPassword;
+	public String getPassword() {
+		return password;
 	}
-	public void setJmxPassword(String jmxPassword) {
-		this.jmxPassword = jmxPassword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public void init() {
-		jmxConnections.setJmxUsername(jmxUserName);
-		jmxConnections.setJmxPassword(jmxPassword);
+		fabricConnections.setUsername(username);
+		fabricConnections.setPassword(password);
 		mbeanServer = ManagementFactory.getPlatformMBeanServer();
 	}
 	
-	
 	public void shutdown() {
-		jmxConnections.shutdown();
+		fabricConnections.shutdown();
 	}
 
 	@Override
@@ -80,12 +79,12 @@ public class BootstrapProcessor implements Processor {
 			while (searchCount < 3) {
 				for (String leader: leaders) { // lets try each leader until one returns
 					try {
-						JmxAdapter jmxAdapter = jmxConnections.getConnection(leader);
-						List<String> jmxUrls = jmxAdapter.getContainers();
-						if (jmxUrls.size() > 0) {
+						FabricAdapter fabricAdapter = fabricConnections.getConnection(leader);
+						List<String> urls = fabricAdapter.getContainers();
+						if (urls.size() > 0) {
 							// now lets get a master broker
-							for (String jmxUrl : jmxUrls) {
-								JmxAdapter container = jmxConnections.getConnection(jmxUrl);
+							for (String url : urls) {
+								FabricAdapter container = fabricConnections.getConnection(url);
 								if (container.isMasterBroker()) {
 									// get the list of queues
 									queueNames = container.getQueues();

@@ -16,12 +16,12 @@ public class QueueCreatorProcessor implements Processor {
 	
 	private ProducerTemplate producerTemplate;
 	private String leaderNodes;
-	private String jmxUserName;
-	private String jmxPassword;
+	private String username;
+	private String password;
 	private String queueCreateQueueName;
 
 	private ObjectMapper objectMapper = new  ObjectMapper();
-	private JmxConnections jmxConnections = new JmxConnections();
+	private FabricConnections fabricConnections = new FabricConnections();
 	
 	public ProducerTemplate getProducerTemplate() {
 		return producerTemplate;
@@ -36,17 +36,17 @@ public class QueueCreatorProcessor implements Processor {
 	public void setLeaderNodes(String leaderNodes) {
 		this.leaderNodes = leaderNodes;
 	}
-	public String getJmxUserName() {
-		return jmxUserName;
+	public String getUsername() {
+		return username;
 	}
-	public void setJmxUserName(String jmxUserName) {
-		this.jmxUserName = jmxUserName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
-	public String getJmxPassword() {
-		return jmxPassword;
+	public String getPassword() {
+		return password;
 	}
-	public void setJmxPassword(String jmxPassword) {
-		this.jmxPassword = jmxPassword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getQueueCreateQueueName() {
@@ -57,8 +57,8 @@ public class QueueCreatorProcessor implements Processor {
 	}
 
 	public void init() {
-		jmxConnections.setJmxUsername(jmxUserName);
-		jmxConnections.setJmxPassword(jmxPassword);
+		fabricConnections.setUsername(username);
+		fabricConnections.setPassword(password);
 	}
 
 	@Override
@@ -69,12 +69,12 @@ public class QueueCreatorProcessor implements Processor {
 			ObjectReader or = objectMapper.reader(QueueCreateEvent.class);
 			QueueCreateEvent queueCreateEvent = or.readValue(body);
 			
-			JmxAdapter jmxAdapter = jmxConnections.getConnection(queueCreateEvent.getContainerJmxUrl());
-			jmxAdapter.createQueue(queueCreateEvent.getQueueName());
+			FabricAdapter fabricAdapter = fabricConnections.getConnection(queueCreateEvent.getContainerJmxUrl());
+			fabricAdapter.createQueue(queueCreateEvent.getQueueName());
 		}
 	}
 	
 	public void shutdown() {
-		jmxConnections.shutdown();
+		fabricConnections.shutdown();
 	}
 }
