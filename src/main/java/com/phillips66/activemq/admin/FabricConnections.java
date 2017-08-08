@@ -60,5 +60,6 @@ public class FabricConnections {
 			FabricAdapter fabricAdapter = entry.getValue();
 		    fabricAdapter.shutdown();
 		}
+		connections.clear();
 	}
 }
