@@ -69,6 +69,7 @@ public class BootstrapProcessor implements Processor {
 			List<String> queueNames = new ArrayList<String>();
 			
 			int searchCount = 0;
+			int totalAddedQueueCount = 0;
 			
 			// get the container urls from any leader, try all nodes 3 times
 			
@@ -84,11 +85,12 @@ public class BootstrapProcessor implements Processor {
 						if (urls.size() > 0) {
 							// now lets get a master broker
 							for (String url : urls) {
+								int addedQueueCount = 0;
 								FabricAdapter container = fabricConnections.getConnection(url);
 								if (container.isMasterBroker()) {
+									logger.info(String.format("Bootstrapping local broker with master broker url=%s", url));
 									// get the list of queues
 									queueNames = container.getQueues();
-		
 									for (String queueName: queueNames) {
 										if (queueName.startsWith(queuePrefix)) {
 											//lets check if we have that queue
@@ -96,30 +98,33 @@ public class BootstrapProcessor implements Processor {
 											if (beans.size() == 0) {
 												Set<ObjectName> brokerBeans = mbeanServer.queryNames(new ObjectName("org.apache.activemq:type=Broker,brokerName=*"), null);		
 												for (ObjectName objectName : brokerBeans) {
+													logger.info(String.format("Syncing missing master broker queue %s to local broker", queueName));
 													mbeanServer.invoke(objectName, "addQueue", new Object[] {queueName}, new String[] {String.class.getName()});
+													totalAddedQueueCount++;
+													addedQueueCount++;
 													break;
 												}
 											}
 										}
 									}
-									break;
-									
+								} else {
+									logger.info(String.format("Container url=%s is not a master broker", url));
 								}
+								logger.info(String.format("Synchronized %s queues to local broker from broker url: %s", addedQueueCount, url));
 							}
-							if (queueNames.size() > 0) {
+							if (totalAddedQueueCount > 0) {
 								break searchloop; // one of the leaders has returned a container list
 							}
 						}
 					} catch (Exception ex) {
-						logger.warn("error processing leader in boostrap, lets continue on checking other leaders: " + ex, ex);
+						logger.warn("error processing leader in boostrap, lets continue on checking other leaders msg: " + ex.getMessage(), ex);
 					}
 				}
 				searchCount++;
-			}
-			
-			
+			}	
+			logger.info(String.format("Synchronized %s total queues to local broker", totalAddedQueueCount));
 		} catch (Exception ex) {
-			logger.error("Error synchronizing queue names while bootstrapping", ex);
+			logger.error("Error synchronizing queue names while bootstrapping msg: " + ex.getMessage() , ex);
 		}
 	}
 }
